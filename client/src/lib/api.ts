@@ -46,14 +46,27 @@ export const apiClient = axios.create({
   }
 });
 
+// Request interceptor to automatically provide Bearer JWT token alongside cookies
+apiClient.interceptors.request.use(config => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('strata_auth_token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 apiClient.interceptors.response.use(
   response => response,
   error => {
     if (error.response && error.response.status === 401) {
       if (typeof window !== 'undefined') {
+        const hadSession = localStorage.getItem('strata_has_session') === 'true' || !!localStorage.getItem('strata_auth_token');
         localStorage.removeItem('strata_has_session');
+        localStorage.removeItem('strata_auth_token');
         const currentPath = window.location.pathname + window.location.search;
-        if (currentPath !== '/login' && currentPath !== '/signup' && currentPath !== '/') {
+        if (hadSession && currentPath !== '/login' && currentPath !== '/signup' && currentPath !== '/' && !currentPath.startsWith('/login')) {
           window.location.href = `/login?next=${encodeURIComponent(currentPath)}&expired=true`;
         }
       }

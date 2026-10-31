@@ -22,8 +22,24 @@ const SHOW_FIRST_FAILING_CASE = process.env.SHOW_FIRST_FAILING_CASE !== 'false';
 
 function getStudentId(req) {
     if (req.sessionUserId) return req.sessionUserId;
-    if (req.cookies && req.cookies.session_token) {
-        const session = db.getSession(req.cookies.session_token);
+
+    let token = null;
+    // 1. Bearer Token in Authorization header (Stateless JWT)
+    const authHeader = req.headers && (req.headers.authorization || req.headers.Authorization);
+    if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7).trim();
+    }
+    // 2. Cookie session_token
+    if (!token && req.cookies && req.cookies.session_token) {
+        token = req.cookies.session_token;
+    }
+    // 3. Fallback X-Session-Token header
+    if (!token && req.headers && req.headers['x-session-token']) {
+        token = String(req.headers['x-session-token']).trim();
+    }
+
+    if (token) {
+        const session = db.getSession(token);
         if (session && session.userId) {
             req.sessionUserId = session.userId;
             return session.userId;
@@ -1694,13 +1710,14 @@ function authRateLimit(req, res, next) {
 }
 
 function setSessionCookie(res, token, rememberMe) {
+    const isHttps = process.env.NODE_ENV === 'production' || !!process.env.VERCEL || !!process.env.NETLIFY;
     const opts = {
         httpOnly: true,
         sameSite: 'Lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: isHttps,
+        maxAge: (rememberMe ? 30 : 7) * 24 * 60 * 60 * 1000
     };
-    if (rememberMe) opts.maxAge = 30 * 24 * 60 * 60 * 1000;
     res.cookie('session_token', token, opts);
 }
 
@@ -1723,7 +1740,7 @@ router.post('/auth/login', authRateLimit, async (req, res) => {
         const session = db.createSession(user.id, !!rememberMe);
         setSessionCookie(res, session.token, !!rememberMe);
         const { passwordHash, ...safeUser } = user;
-        return res.json({ user: safeUser });
+        return res.json({ user: safeUser, token: session.token });
     } catch (err) {
         console.error('[/auth/login]', err);
         return res.status(500).json({ error: 'An internal error occurred.' });
@@ -1754,7 +1771,7 @@ router.post('/auth/signup', authRateLimit, async (req, res) => {
         const session = db.createSession(result.id, false);
         setSessionCookie(res, session.token, false);
         const { passwordHash, ...safeUser } = result;
-        return res.status(201).json({ user: safeUser });
+        return res.status(201).json({ user: safeUser, token: session.token });
     } catch (err) {
         console.error('[/auth/signup]', err);
         return res.status(500).json({ error: 'An internal error occurred.' });
@@ -1763,7 +1780,13 @@ router.post('/auth/signup', authRateLimit, async (req, res) => {
 
 // POST /api/auth/logout
 router.post('/auth/logout', (req, res) => {
-    const token = req.cookies && req.cookies.session_token;
+    let token = req.cookies && req.cookies.session_token;
+    if (!token) {
+        const authHeader = req.headers && (req.headers.authorization || req.headers.Authorization);
+        if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+            token = authHeader.substring(7).trim();
+        }
+    }
     if (token) db.deleteSession(token);
     res.clearCookie('session_token', { path: '/' });
     return res.json({ success: true });

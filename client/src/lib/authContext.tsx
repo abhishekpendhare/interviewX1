@@ -24,9 +24,18 @@ interface AuthCtx {
 const Ctx = createContext<AuthCtx | null>(null);
 
 async function apiFetch(path: string, opts: RequestInit = {}) {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('strata_auth_token') : null;
+  const authHeaders: Record<string, string> = {};
+  if (token) {
+    authHeaders['Authorization'] = `Bearer ${token}`;
+  }
   const res = await fetch(path, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...((opts.headers as Record<string, string>) || {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders,
+      ...((opts.headers as Record<string, string>) || {})
+    },
     ...opts,
   });
   const body = await res.json().catch(() => ({}));
@@ -36,7 +45,8 @@ async function apiFetch(path: string, opts: RequestInit = {}) {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
-  const hasSessionFlag = typeof window !== 'undefined' && localStorage.getItem('strata_has_session') === 'true';
+  const hasSessionFlag = typeof window !== 'undefined' && 
+    (localStorage.getItem('strata_has_session') === 'true' || !!localStorage.getItem('strata_auth_token'));
 
   const { data, isLoading } = useQuery<{ user: AuthUser } | null>({
     queryKey: ['auth/me'],
@@ -46,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (err: any) {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('strata_has_session');
+          localStorage.removeItem('strata_auth_token');
         }
         return null; 
       }
@@ -60,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Re-check session on pageshow (including bfcache restores) and tab focus
   useEffect(() => {
     const handlePageShow = (event: PageTransitionEvent) => {
-      const activeFlag = localStorage.getItem('strata_has_session') === 'true';
+      const activeFlag = localStorage.getItem('strata_has_session') === 'true' || !!localStorage.getItem('strata_auth_token');
       if (activeFlag) {
         invalidate();
       } else {
@@ -69,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const handleFocus = () => {
-      const activeFlag = localStorage.getItem('strata_has_session') === 'true';
+      const activeFlag = localStorage.getItem('strata_has_session') === 'true' || !!localStorage.getItem('strata_auth_token');
       if (activeFlag) {
         invalidate();
       }
@@ -86,9 +97,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMut = useMutation({
     mutationFn: ({ email, password, rememberMe }: { email: string; password: string; rememberMe?: boolean }) =>
       apiFetch(`${API}/login`, { method: 'POST', body: JSON.stringify({ email, password, rememberMe }) }),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       if (typeof window !== 'undefined') {
         localStorage.setItem('strata_has_session', 'true');
+        if (res && res.token) {
+          localStorage.setItem('strata_auth_token', res.token);
+        }
       }
       invalidate();
     },
@@ -97,9 +111,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signupMut = useMutation({
     mutationFn: ({ name, email, password }: { name: string; email: string; password: string }) =>
       apiFetch(`${API}/signup`, { method: 'POST', body: JSON.stringify({ name, email, password }) }),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       if (typeof window !== 'undefined') {
         localStorage.setItem('strata_has_session', 'true');
+        if (res && res.token) {
+          localStorage.setItem('strata_auth_token', res.token);
+        }
       }
       invalidate();
     },
@@ -110,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: () => {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('strata_has_session');
+        localStorage.removeItem('strata_auth_token');
       }
       qc.setQueryData(['auth/me'], null);
     },
