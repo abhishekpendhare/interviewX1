@@ -1,0 +1,50 @@
+/* ─────────────────────────────────────────────────────────────
+   InterviewX Design Tokens — theme.css
+   Synced with index.css and style.css
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --bg-base: #0B1020;
+  --bg-surface: #10172D;
+  --bg-card: rgba(18, 26, 49, 0.65);
+  --bg-card-hover: rgba(28, 38, 72, 0.85);
+  --bg-elevated: #16203D;
+  --bg-overlay: rgba(11, 16, 32, 0.85);
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-line: rgba(255, 255, 255, 0.14);
+  --border-active: rgba(109, 92, 255, 0.4);
+  --border-focus: #6D5CFF;
+  --border-cyan: rgba(45, 212, 208, 0.35);
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-inverse: #0B1020;
+
+  --accent-primary: #6D5CFF;
+  --accent-primary-hover: #5A48FA;
+  --accent-primary-subtle: rgba(109, 92, 255, 0.15);
+  --accent-secondary: #2DD4D0;
+  --accent-secondary-subtle: rgba(45, 212, 208, 0.15);
+  --accent-gradient: linear-gradient(135deg, #4A72FF 0%, #6D5CFF 50%, #8B7BFF 100%);
+
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #38BDF8;
+
+  --glass-bg: rgba(18, 26, 49, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-glow: rgba(109, 92, 255, 0.25);
+
+  --chart-cyan: #2DD4D0;
+  --chart-violet: #8B7BFF;
+  --chart-amber: #F59E0B;
+  --chart-emerald: #10B981;
+  --chart-rose: #EF4444;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}

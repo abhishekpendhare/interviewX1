@@ -1,0 +1,1892 @@
+[
+  {
+    "id": "tech-hashmap-collisions",
+    "track": "Technical",
+    "domain": "technical",
+    "topic": "Data Structures & Hashing",
+    "difficulty": "Medium",
+    "question": "Can you explain how a HashMap handles collisions internally, and what happens when the load factor threshold is breached?",
+    "keyPoints": [
+      {
+        "id": "chaining",
+        "label": "Separate chaining collision strategy using linked lists in buckets",
+        "weight": 0.3,
+        "synonyms": [
+          "separate chaining",
+          "chaining",
+          "linked list in bucket",
+          "array of linked lists",
+          "linked lists in each bucket",
+          "linked list bucket",
+          "bucket has a linked list",
+          "buckets with linked lists",
+          "open addressing"
+        ],
+        "acceptableAlternatives": [
+          "open addressing with linear or quadratic probing if framed as alternative hashtable implementation"
+        ],
+        "required": true
+      },
+      {
+        "id": "load_factor",
+        "label": "Load factor threshold (default 0.75 in Java) controlling capacity triggers",
+        "weight": 0.2,
+        "synonyms": [
+          "load factor",
+          "0.75",
+          "capacity ratio",
+          "threshold",
+          "size divided by capacity",
+          "load factor of 0.75",
+          "load factor threshold"
+        ],
+        "acceptableAlternatives": [
+          "ratio of elements to total bucket count"
+        ],
+        "required": true
+      },
+      {
+        "id": "rehashing",
+        "label": "Rehashing when threshold is breached: internal array doubles in capacity with amortized O(1) insert cost",
+        "weight": 0.25,
+        "synonyms": [
+          "rehash",
+          "rehashing",
+          "doubles in size",
+          "doubles capacity",
+          "doubles the capacity",
+          "doubles the table",
+          "redistributes keys",
+          "redistribute",
+          "amortized o(1)"
+        ],
+        "acceptableAlternatives": [
+          "new table allocated with power of two capacity and existing entries re-indexed"
+        ],
+        "required": true
+      },
+      {
+        "id": "treeification",
+        "label": "Treeification in Java 8+: converts long bucket chains (exceeding 8 nodes) to Red-Black trees for O(log n) worst-case",
+        "weight": 0.25,
+        "synonyms": [
+          "treeify",
+          "treeification",
+          "red-black tree",
+          "rbtree",
+          "treebin",
+          "threshold of 8",
+          "8 node",
+          "8 nodes",
+          "o(log n) worst case",
+          "balanced tree",
+          "convert to tree"
+        ],
+        "acceptableAlternatives": [
+          "balanced binary search tree conversion when bucket length surpasses 8"
+        ],
+        "required": false
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "HashMap uses binary search trees by default for every bucket",
+        "matchPattern": "\\b(binary search tree|bst).*(by default|every bucket|all buckets|from the start|from start)\\b",
+        "correction": "Buckets start as simple linked lists; they only convert to Red-Black trees when a single bucket exceeds 8 entries (Java 8+).",
+        "penalty": 0.25
+      },
+      {
+        "claim": "Load factor is not important or does not resize automatically",
+        "matchPattern": "\\b(load factor.*(not important|does not resize|never resizes|never changes))\\b",
+        "correction": "Load factor is critical: it controls when rehashing occurs. Java HashMaps automatically double capacity when size exceeds capacity × 0.75.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "Rehashing is O(1) worst-case",
+        "matchPattern": "\\brehashing.*(is o\\(1\\) worst|worst.*o\\(1\\))\\b",
+        "correction": "Rehashing copies every element to a new array and is O(n) worst-case, though amortized O(1) over all insertions.",
+        "penalty": 0.15
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions buckets with linked lists and that rehashing resizes the array.",
+      "good": "Explains separate chaining, 0.75 load factor, doubling array capacity, and O(n) rehashing.",
+      "excellent": "Explains separate chaining, 0.75 trade-off, amortized O(1), and Java 8 treeification to Red-Black trees at threshold 8 (untreeify at 6)."
+    },
+    "modelAnswer": "A HashMap handles collisions using **separate chaining**: each bucket slot in the underlying array holds a linked list of key-value entries hashing to that bucket index.\n\n**Load Factor & Rehashing:**\nWhen the number of entries exceeds (capacity × load_factor) — defaulting to 0.75 in Java — **rehashing** triggers. The internal array doubles in capacity, and every element is re-indexed. While an individual rehash is O(n), it occurs geometrically, maintaining an amortized O(1) insertion time.\n\n**Java 8 Treeification:**\nIf a single bucket's collision chain exceeds 8 entries and total table capacity is at least 64, Java converts that chain into a **Red-Black tree (TreeBin)**. This bounds worst-case lookup in degenerate buckets to O(log n) instead of O(n)."
+  },
+  {
+    "id": "tech-optimistic-pessimistic-locking",
+    "track": "Technical",
+    "domain": "cs_fundamentals",
+    "topic": "DBMS & Concurrency",
+    "difficulty": "Hard",
+    "question": "What is the difference between optimistic and pessimistic locking in database transactions? When would you choose which?",
+    "keyPoints": [
+      {
+        "id": "pessimistic_definition",
+        "label": "Pessimistic locking acquires exclusive row or table locks upfront (e.g. SELECT FOR UPDATE) to block concurrent writers",
+        "weight": 0.3,
+        "synonyms": [
+          "pessimistic",
+          "exclusive lock",
+          "select for update",
+          "row lock",
+          "blocks concurrent",
+          "locks upfront",
+          "pessimistic lock",
+          "locks rows upfront"
+        ],
+        "acceptableAlternatives": [
+          "locking resource before reading or modifying so no other transaction can access it"
+        ],
+        "required": true
+      },
+      {
+        "id": "optimistic_definition",
+        "label": "Optimistic locking avoids locking upfront; uses version numbers or timestamps to detect conflicts at commit time",
+        "weight": 0.3,
+        "synonyms": [
+          "optimistic",
+          "version column",
+          "timestamp",
+          "commit time check",
+          "detect conflict",
+          "optimistic lock",
+          "compare and swap",
+          "version numbers"
+        ],
+        "acceptableAlternatives": [
+          "records read version and updates only if current version matches read version"
+        ],
+        "required": true
+      },
+      {
+        "id": "optimistic_tradeoff",
+        "label": "Optimistic is optimal for high-read / low-write contention, avoiding locking overhead but requiring retry logic on conflict",
+        "weight": 0.2,
+        "synonyms": [
+          "low contention",
+          "high read",
+          "read heavy",
+          "retry on conflict",
+          "aborted and retried",
+          "rollback on mismatch",
+          "retries when conflicts occur",
+          "requiring retry"
+        ],
+        "acceptableAlternatives": [
+          "best when conflicts are rare, but aborts and retries on version collision"
+        ],
+        "required": true
+      },
+      {
+        "id": "pessimistic_tradeoff",
+        "label": "Pessimistic is optimal for high-write contention or financial transactions, preventing retry storms at the risk of deadlocks",
+        "weight": 0.2,
+        "synonyms": [
+          "high contention",
+          "write heavy",
+          "financial",
+          "inventory",
+          "deadlock risk",
+          "avoids retry storm",
+          "serialize access",
+          "risks deadlocks"
+        ],
+        "acceptableAlternatives": [
+          "best when update conflicts are frequent, preventing duplicate retries at the cost of concurrency and deadlock potential"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "Optimistic locking is always faster than pessimistic locking under all circumstances",
+        "matchPattern": "\\boptimistic.*(always faster|always better|always superior)\\b",
+        "correction": "Under high write contention, optimistic locking causes massive retry storms and transaction rollbacks, performing much worse than pessimistic locking.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "Pessimistic locking prevents all database deadlocks",
+        "matchPattern": "\\bpessimistic.*(prevents all|eliminates all|avoids all).*(deadlock)\\b",
+        "correction": "Pessimistic locking actually introduces deadlock risk when multiple transactions acquire locks in different orders.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "States pessimistic locks rows and optimistic checks version numbers.",
+      "good": "Distinguishes SELECT FOR UPDATE from version columns and contrasts high-read vs high-write workloads.",
+      "excellent": "Details SELECT FOR UPDATE vs version increment, deadlock hazards in pessimistic, and retry storms/throughput degradation in optimistic."
+    },
+    "modelAnswer": "**Pessimistic Locking:**\nAcquires explicit exclusive locks (e.g., `SELECT ... FOR UPDATE`) immediately before modifying data. Other transactions attempting to modify or lock the same row block until the transaction commits or rolls back.\n- **Best for:** High-contention write workloads (e.g. ticket booking, banking ledger balances) where conflicts are frequent and retries are expensive.\n- **Downside:** Reduces concurrency and introduces deadlock risks.\n\n**Optimistic Locking:**\nReads proceed without locks. The entity maintains a `version` column (or timestamp). During the update: `UPDATE table SET col = val, version = version + 1 WHERE id = ? AND version = read_version`. If 0 rows were updated, a conflict occurred, and the transaction is aborted/retried.\n- **Best for:** High-read, low-write contention workloads (e.g. user profile updates, blog CMS) where conflicts are rare.\n- **Downside:** High conflict rates trigger retry storms and wasted compute."
+  },
+  {
+    "id": "tech-process-vs-thread",
+    "track": "Technical",
+    "domain": "cs_fundamentals",
+    "topic": "Operating Systems",
+    "difficulty": "Medium",
+    "question": "In an operating system, what is the exact difference between a process and a thread, and how does context switching overhead differ between the two?",
+    "keyPoints": [
+      {
+        "id": "address_space",
+        "label": "Processes have isolated virtual address spaces; threads in a process share the address space, heap, and open file descriptors",
+        "weight": 0.3,
+        "synonyms": [
+          "isolated address space",
+          "isolated virtual address",
+          "virtual memory",
+          "shared heap",
+          "share memory",
+          "separate address space",
+          "threads share heap",
+          "threads share memory",
+          "isolated address spaces"
+        ],
+        "acceptableAlternatives": [
+          "process has private memory mapping while threads share code, data, and heap segments"
+        ],
+        "required": true
+      },
+      {
+        "id": "thread_private",
+        "label": "Each thread has its own private execution context: stack, program counter (PC), and CPU register set",
+        "weight": 0.2,
+        "synonyms": [
+          "own stack",
+          "private stack",
+          "program counter",
+          "registers",
+          "register set",
+          "tcb",
+          "stack pointer",
+          "swap registers",
+          "swaps registers"
+        ],
+        "acceptableAlternatives": [
+          "thread-private stack and CPU registers for function call frames"
+        ],
+        "required": true
+      },
+      {
+        "id": "process_switch_overhead",
+        "label": "Process context switch requires switching page tables (CR3 register) and flushes the TLB, causing CPU cache misses",
+        "weight": 0.25,
+        "synonyms": [
+          "flushes the tlb",
+          "tlb flush",
+          "page table switch",
+          "translation lookaside buffer",
+          "page tables",
+          "cache misses",
+          "expensive context switch",
+          "change page tables"
+        ],
+        "acceptableAlternatives": [
+          "flushing memory management unit mappings and invalidating cache"
+        ],
+        "required": true
+      },
+      {
+        "id": "thread_switch_overhead",
+        "label": "Thread context switch does not switch page tables or flush TLB; only swaps registers and stack pointer, making it much faster",
+        "weight": 0.25,
+        "synonyms": [
+          "preserves the tlb",
+          "no tlb flush",
+          "without tlb flush",
+          "same address space",
+          "swaps registers",
+          "cheaper switch",
+          "stack pointer switch",
+          "lightweight context switch",
+          "thread switch preserves"
+        ],
+        "acceptableAlternatives": [
+          "only register state and stack change without reloading memory translation tables"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "Threads have their own separate heap memory",
+        "matchPattern": "\\b(threads.*(have|own).*(separate heap|own heap|independent heap|private heap))\\b",
+        "correction": "Threads in the same process share the heap and global data. Only the stack and registers are thread-private.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "A process context switch is only slightly slower than a thread context switch",
+        "matchPattern": "\\b(process context switch.*(only slightly|negligible|marginal|not much).*(slower|different|more expensive))\\b",
+        "correction": "A process context switch flushes the TLB and switches page directories, causing severe L1/L2/L3 cache misses that make it significantly more expensive than a thread switch.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "States processes are heavy and threads are lightweight inside a process.",
+      "good": "Explains isolated memory vs shared heap, and notes process switches are slower because of memory mappings.",
+      "excellent": "Details private stack/registers vs shared heap, and contrasts page table changes + TLB flush cache invalidation with lightweight register swapping."
+    },
+    "modelAnswer": "**Process vs. Thread:**\n- A **process** is an independent execution unit with its own isolated virtual address space, page tables, file descriptors, and PID. Processes communicate via IPC.\n- A **thread** is a lightweight execution flow within a parent process. All threads in a process share the same virtual address space (heap, code, global data, and file descriptors). However, each thread maintains its own **stack, program counter, and CPU register state**.\n\n**Context Switching Overhead:**\n- **Process Switch:** The OS must switch page table base registers (CR3 on x86), which **flushes the Translation Lookaside Buffer (TLB)**. This invalidates cached virtual-to-physical address mappings and causes cascading CPU cache misses until the working set warms up again.\n- **Thread Switch:** Because threads share the same address space, **no page table switch or TLB flush occurs**. The CPU only needs to save and restore general-purpose registers, the stack pointer, and the instruction pointer, making thread switching much faster."
+  },
+  {
+    "id": "tech-concurrenthashmap-java8",
+    "track": "JavaFoundation",
+    "domain": "technical",
+    "topic": "Java Collections & Concurrency",
+    "difficulty": "Hard",
+    "question": "How does Java 8+ ConcurrentHashMap achieve high write concurrency without locking the entire table? Contrast it with Hashtable and Collections.synchronizedMap.",
+    "keyPoints": [
+      {
+        "id": "cas_empty_bucket",
+        "label": "Lock-free insertion into empty buckets using hardware CAS (Compare-And-Swap)",
+        "weight": 0.3,
+        "synonyms": [
+          "cas",
+          "compare and swap",
+          "compare-and-swap",
+          "lock free",
+          "empty bucket",
+          "first node",
+          "unsafe.compareandswap",
+          "c a s"
+        ],
+        "acceptableAlternatives": [
+          "optimistic atomic check and set without taking any monitor lock for the first element"
+        ],
+        "required": true
+      },
+      {
+        "id": "node_level_locking",
+        "label": "Fine-grained synchronized locking on only the head node of the specific collision bucket",
+        "weight": 0.3,
+        "synonyms": [
+          "synchronized on head",
+          "head node",
+          "bucket level lock",
+          "node lock",
+          "synchronized(head)",
+          "fine grained lock",
+          "node locks"
+        ],
+        "acceptableAlternatives": [
+          "locks only the single bucket where collision occurs, leaving other buckets accessible"
+        ],
+        "required": true
+      },
+      {
+        "id": "lock_free_reads",
+        "label": "Lock-free reads (get operations) achieved via volatile visibility of table array elements and node pointers",
+        "weight": 0.2,
+        "synonyms": [
+          "lock free read",
+          "volatile",
+          "volatile next",
+          "get is lockless",
+          "no lock on get",
+          "concurrent reads",
+          "volatile visibility"
+        ],
+        "acceptableAlternatives": [
+          "reads require no locks because memory visibility is guaranteed by volatile memory semantics"
+        ],
+        "required": true
+      },
+      {
+        "id": "contrast_hashtable",
+        "label": "Contrasted with Hashtable and Collections.synchronizedMap which lock the entire map on every read and write",
+        "weight": 0.2,
+        "synonyms": [
+          "hashtable",
+          "synchronizedmap",
+          "global lock",
+          "locks entire table",
+          "monolithic lock",
+          "single lock",
+          "lock the entire table"
+        ],
+        "acceptableAlternatives": [
+          "Hashtable synchronizes all methods globally, causing severe thread contention"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "ConcurrentHashMap uses 16 segment locks in Java 8 and newer",
+        "matchPattern": "\\b(16 segment locks|segment locks in java 8)\\b",
+        "correction": "Segment-based locking was removed in Java 8. Java 8+ uses CAS on empty buckets and synchronized blocks on individual bucket heads.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "ConcurrentHashMap acquires a lock during get() operations",
+        "matchPattern": "\\b(locks.*during get|acquires a lock during get)\\b",
+        "correction": "Read operations in ConcurrentHashMap are completely lock-free; volatile fields ensure immediate visibility of updates without synchronization.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions bucket level locks instead of locking the whole map.",
+      "good": "Explains CAS on empty bucket, bucket head synchronization, and contrasts with Hashtable global locks.",
+      "excellent": "Details CAS on first node, synchronized(head) on collision, volatile memory visibility for lock-free gets, and CounterCell striped counters."
+    },
+    "modelAnswer": "**Java 8+ ConcurrentHashMap Concurrency Model:**\n1. **CAS for Empty Buckets:** When inserting into a previously empty bucket slot, ConcurrentHashMap uses lock-free hardware **Compare-And-Swap (CAS)** via `Unsafe`. If no node exists, it sets the head without taking any lock.\n2. **Fine-Grained Node Locking:** When a hash collision occurs, the thread locks **only the head node of that specific bucket** using `synchronized(firstNode)`. Other threads reading or writing to other buckets proceed concurrently with zero contention.\n3. **Lock-Free Reads:** Table buckets, node values, and `next` links are marked `volatile`. `get()` operations never acquire locks and execute at full memory speed.\n\n**Contrast with Hashtable / Collections.synchronizedMap:**\nBoth Hashtable and `Collections.synchronizedMap` place a coarse **global monitor lock on the entire instance** for every method. All concurrent reads and writes are forced into a single sequential queue, causing massive bottlenecks under multi-threaded load."
+  },
+  {
+    "id": "tech-jvm-heap-metaspace",
+    "track": "JavaFoundation",
+    "domain": "technical",
+    "topic": "JVM Architecture & Memory Management",
+    "difficulty": "Hard",
+    "question": "Explain the difference between Heap memory and Metaspace in the JVM. What causes an OutOfMemoryError: Metaspace, and how do you diagnose it?",
+    "keyPoints": [
+      {
+        "id": "heap_vs_metaspace",
+        "label": "Heap stores object instances and arrays in managed memory; Metaspace stores class metadata and bytecode in native off-heap RAM",
+        "weight": 0.35,
+        "synonyms": [
+          "object instances",
+          "class metadata",
+          "native memory",
+          "off-heap",
+          "off heap",
+          "bytecode",
+          "heap stores objects",
+          "metaspace native"
+        ],
+        "acceptableAlternatives": [
+          "Heap holds runtime application objects while Metaspace holds loaded class definitions in OS memory"
+        ],
+        "required": true
+      },
+      {
+        "id": "metaspace_oom_cause",
+        "label": "Metaspace OOM is caused by classloader memory leaks, excessive dynamic proxy/bytecode generation (CGLIB, ByteBuddy), or repeated redeploys",
+        "weight": 0.35,
+        "synonyms": [
+          "classloader leak",
+          "classloader memory leak",
+          "dynamic proxy",
+          "cglib",
+          "bytebuddy",
+          "reflection",
+          "repeated redeploy",
+          "class metadata leak",
+          "unbounded class generation"
+        ],
+        "acceptableAlternatives": [
+          "creating new class definitions continuously that cannot be garbage collected due to referenced classloaders"
+        ],
+        "required": true
+      },
+      {
+        "id": "diagnosis_tuning",
+        "label": "Tuned via -XX:MaxMetaspaceSize and diagnosed using jcmd GC.classloader_stats, jstat -class, or heap dumps in Eclipse MAT",
+        "weight": 0.3,
+        "synonyms": [
+          "maxmetaspacesize",
+          "jcmd",
+          "jstat",
+          "classloader_stats",
+          "heap dump",
+          "eclipse mat",
+          "profiler",
+          "diagnosed using"
+        ],
+        "acceptableAlternatives": [
+          "monitoring loaded class count and limiting maximum metaspace size with JVM flags"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "Metaspace is allocated inside the JVM heap space",
+        "matchPattern": "\\b(metaspace is (stored|allocated) inside the (jvm )?heap)\\b",
+        "correction": "Metaspace is stored in native OS virtual memory outside the contiguous Java Heap (unlike the deprecated Java 7 PermGen).",
+        "penalty": 0.25
+      },
+      {
+        "claim": "Metaspace stores static variables in Java 8+",
+        "matchPattern": "\\b(metaspace stores static variables)\\b",
+        "correction": "In Java 8+, static variables and interned strings were moved into the regular Java Heap; Metaspace strictly stores class metadata.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "States Heap stores objects while Metaspace stores class definitions.",
+      "good": "Explains native memory allocation, classloader leaks as the OOM root cause, and setting MaxMetaspaceSize.",
+      "excellent": "Distinguishes PermGen vs Metaspace, details CGLIB/Spring dynamic proxy leaks, and names jcmd/jstat/MAT diagnostic commands."
+    },
+    "modelAnswer": "**Heap vs Metaspace:**\n- **Java Heap:** Holds all runtime object instances, arrays, and static variables. Managed by the JVM Garbage Collector with generational spaces (Eden, Survivor, Tenured).\n- **Metaspace (Java 8+):** Stored in **native OS virtual memory** (off-heap). It holds per-class metadata: method bytecodes, annotations, runtime constant pools, and method tables. Unlike Java 7 PermGen, Metaspace auto-sizes up to available OS memory unless bounded.\n\n**Causes of OutOfMemoryError: Metaspace:**\n1. **Classloader Leaks:** Application servers redeploying web applications without tearing down previous classloader roots.\n2. **Unbounded Dynamic Bytecode Generation:** Frameworks using CGLIB, ByteBuddy, Spring AOP, or runtime proxies that synthesize new classes dynamically without recycling definitions.\n\n**Diagnosis & Remediation:**\n- Inspect class counts via `jstat -class <PID>` and `jcmd <PID> VM.classloader_stats`.\n- Cap memory with `-XX:MaxMetaspaceSize=512m`.\n- Take a heap dump and inspect classloader references in Eclipse Memory Analyzer (MAT)."
+  },
+  {
+    "id": "tech-spring-n-plus-one",
+    "track": "SpringBoot",
+    "domain": "technical",
+    "topic": "Spring Data JPA & Hibernate",
+    "difficulty": "Hard",
+    "question": "What is the N+1 select problem in Spring Data JPA? Show how to fix it using @EntityGraph and JOIN FETCH, and explain why FetchType.EAGER does not solve it.",
+    "keyPoints": [
+      {
+        "id": "n1_problem_cause",
+        "label": "N+1 select occurs when 1 initial query for parent entities triggers N separate secondary queries to load related child records",
+        "weight": 0.3,
+        "synonyms": [
+          "1 query for parent",
+          "1 initial query",
+          "n queries",
+          "parent records",
+          "child associations",
+          "n additional queries",
+          "n+1 queries",
+          "n+1 select",
+          "n select"
+        ],
+        "acceptableAlternatives": [
+          "fetching N parents causes Hibernate to fire 1 query for parents plus 1 query per parent for its children"
+        ],
+        "required": true
+      },
+      {
+        "id": "join_fetch_solution",
+        "label": "Fix via JPQL 'JOIN FETCH' which generates an SQL JOIN to load parent and child entities in a single round-trip",
+        "weight": 0.25,
+        "synonyms": [
+          "join fetch",
+          "jpql join fetch",
+          "single sql query",
+          "inner join fetch",
+          "left join fetch",
+          "sql join"
+        ],
+        "acceptableAlternatives": [
+          "using JPQL query with JOIN FETCH to eagerly join child tables in one SQL statement"
+        ],
+        "required": true
+      },
+      {
+        "id": "entity_graph_solution",
+        "label": "Fix via Spring Data '@EntityGraph(attributePaths = {...})' which defines dynamic fetch plans over repository methods",
+        "weight": 0.25,
+        "synonyms": [
+          "@entitygraph",
+          "entity graph",
+          "entitygraph",
+          "attributepaths",
+          "dynamic fetch plan",
+          "namedentitygraph"
+        ],
+        "acceptableAlternatives": [
+          "specifying EntityGraph annotation on the repository method to override lazy loading"
+        ],
+        "required": true
+      },
+      {
+        "id": "eager_fails_explanation",
+        "label": "FetchType.EAGER does not solve N+1 for findAll() because JPQL queries bypass association mappings on initial execution",
+        "weight": 0.2,
+        "synonyms": [
+          "eager does not fix",
+          "eager does not solve",
+          "jpql executes root query",
+          "findall still fires n queries",
+          "eager fails"
+        ],
+        "acceptableAlternatives": [
+          "Hibernate parses JPQL first and fetches the entity, then notices EAGER and fires secondary queries anyway"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "Setting FetchType.EAGER in entity annotations resolves the N+1 select problem",
+        "matchPattern": "\\b(fetchtype\\.eager.*(resolves|fixes|completely resolves))\\b",
+        "correction": "FetchType.EAGER only works for findById(). In JPQL or findAll(), Hibernate runs the root query first and then executes N subsequent queries for EAGER relationships.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "JOIN FETCH can be applied to multiple @OneToMany lists without any risk",
+        "matchPattern": "\\b(join fetch.*(without any risk|multiple @onetomany))\\b",
+        "correction": "Applying JOIN FETCH to multiple Collection (Bag) attributes triggers a MultipleBagFetchException or creates a massive Cartesian product.",
+        "penalty": 0.2
+      }
+    ],
+    "depthLevels": {
+      "basic": "Explains 1 parent query plus N child queries.",
+      "good": "Defines N+1, shows JOIN FETCH or @EntityGraph, and notes EAGER is not a fix.",
+      "excellent": "Explains why JPQL root parsing makes EAGER fire N queries, details JOIN FETCH vs @EntityGraph, and mentions @BatchSize as an alternative."
+    },
+    "modelAnswer": "**The N+1 Select Problem:**\nOccurs when loading $N$ parent records (e.g. `Author`) where each author has a collection of `books`. Executing `authorRepository.findAll()` issues **1 query** for authors. Then, iterating over the authors to access their books causes Hibernate to trigger **$N$ additional queries** ($1 + N$ total queries), crushing database performance.\n\n**Why `FetchType.EAGER` Fails:**\nWhen executing a JPQL query like `SELECT a FROM Author a`, Hibernate executes the JPQL statement directly first. Only *after* building the parent entities does it inspect the mapping, realize `books` is EAGER, and immediately fire $N$ separate queries anyway.\n\n**Solutions:**\n1. **JPQL `JOIN FETCH`:**\n   `@Query(\"SELECT a FROM Author a LEFT JOIN FETCH a.books\")` executes a single SQL JOIN to fetch parent and children together.\n2. **Spring Data `@EntityGraph`:**\n   `@EntityGraph(attributePaths = {\"books\"})` dynamically overrides lazy loading for that specific query.\n3. **Hibernate `@BatchSize(size = 30)`:** Batches child loading into `WHERE author_id IN (?, ?, ...)`."
+  },
+  {
+    "id": "tech-spring-security-jwt-filter",
+    "track": "SpringBoot",
+    "domain": "technical",
+    "topic": "Spring Security & REST APIs",
+    "difficulty": "Hard",
+    "question": "Explain how Spring Security's SecurityFilterChain works for stateless JWT authentication. Where should the JWT filter be positioned and why?",
+    "keyPoints": [
+      {
+        "id": "filter_chain_architecture",
+        "label": "SecurityFilterChain is an ordered chain of servlet filters managed via FilterChainProxy and DelegatingFilterProxy",
+        "weight": 0.25,
+        "synonyms": [
+          "securityfilterchain",
+          "security filter chain",
+          "filterchainproxy",
+          "delegatingfilterproxy",
+          "servlet filter chain",
+          "ordered pipeline",
+          "pipeline of servlet filters"
+        ],
+        "acceptableAlternatives": [
+          "a pipeline of security filters that inspect every incoming HTTP servlet request"
+        ],
+        "required": true
+      },
+      {
+        "id": "stateless_session_policy",
+        "label": "Configures SessionCreationPolicy.STATELESS so Spring Security never creates or reads HTTP sessions",
+        "weight": 0.25,
+        "synonyms": [
+          "sessioncreationpolicy.stateless",
+          "stateless",
+          "no http session",
+          "disable session",
+          "no cookie",
+          "stateless session"
+        ],
+        "acceptableAlternatives": [
+          "ensuring the server maintains no in-memory session state"
+        ],
+        "required": true
+      },
+      {
+        "id": "filter_positioning",
+        "label": "JWT filter is positioned BEFORE UsernamePasswordAuthenticationFilter using addFilterBefore()",
+        "weight": 0.25,
+        "synonyms": [
+          "addfilterbefore",
+          "usernamepasswordauthenticationfilter",
+          "before username password",
+          "early in chain",
+          "before usernamepasswordauthenticationfilter"
+        ],
+        "acceptableAlternatives": [
+          "inserted ahead of form login filter so the Bearer token authenticates the request first"
+        ],
+        "required": true
+      },
+      {
+        "id": "security_context_population",
+        "label": "Extracts Bearer token, validates cryptographic signature, and sets SecurityContextHolder Authentication token",
+        "weight": 0.25,
+        "synonyms": [
+          "securitycontextholder",
+          "bearer token",
+          "validate signature",
+          "usernamepasswordauthenticationtoken",
+          "set authentication",
+          "securitycontext",
+          "authentication token is set"
+        ],
+        "acceptableAlternatives": [
+          "decodes claims, builds Authentication object, and populates the SecurityContext"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "JWT authentication creates an HTTP session on the server",
+        "matchPattern": "\\b(jwt.*creates an http session)\\b",
+        "correction": "Stateless JWT authentication explicitly disables HTTP sessions (SessionCreationPolicy.STATELESS); credentials are cryptographically verified per request.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "The JWT filter should be placed after AuthorizationFilter",
+        "matchPattern": "\\b(jwt filter.*placed after authorization)\\b",
+        "correction": "Authentication (who you are) must always execute before Authorization (checking user roles/permissions).",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions JWT token verification in a filter before processing requests.",
+      "good": "Explains stateless session policy, addFilterBefore UsernamePasswordAuthenticationFilter, and setting SecurityContextHolder.",
+      "excellent": "Details FilterChainProxy, OncePerRequestFilter, cryptographic signature validation, setting Authentication in SecurityContextHolder, and downstream authorization checks."
+    },
+    "modelAnswer": "**Spring Security Stateless JWT Authentication:**\n1. **Stateless Configuration:**\n   Configure `http.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))` to ensure the server never creates or relies on `JSESSIONID` cookies.\n2. **Filter Positioning:**\n   Place the custom JWT filter **before** `UsernamePasswordAuthenticationFilter` using:\n   `http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)`.\n   *Why?* Authentication must precede authorization and form-based handlers. By placing the JWT filter early, subsequent filters find an already-authenticated principal in the security context.\n3. **Execution Flow:**\n   - Inherits `OncePerRequestFilter` to inspect `Authorization: Bearer <token>`.\n   - Validates cryptographic signature and expiration.\n   - Instantiates a `UsernamePasswordAuthenticationToken(userDetails, null, authorities)`.\n   - Stores it in `SecurityContextHolder.getContext().setAuthentication(auth)`."
+  },
+  {
+    "id": "dsa-longest-consecutive-sequence",
+    "track": "DSA",
+    "domain": "dsa",
+    "topic": "Arrays & Hash Sets",
+    "difficulty": "Medium",
+    "question": "Given an unsorted array of integers, find the length of the longest consecutive elements sequence in O(n) time.",
+    "keyPoints": [
+      {
+        "id": "hashset_insert",
+        "label": "Insert all array elements into a HashSet in O(n) time for O(1) membership lookups",
+        "weight": 0.3,
+        "synonyms": [
+          "hashset",
+          "hash set",
+          "set(nums)",
+          "insert into set",
+          "o(1) lookup in set",
+          "into a hashset"
+        ],
+        "acceptableAlternatives": [
+          "building a hash table or set of unique elements"
+        ],
+        "required": true
+      },
+      {
+        "id": "sequence_start_check",
+        "label": "Only initiate counting a sequence from num if (num - 1) is NOT in the set (identifies true streak start)",
+        "weight": 0.35,
+        "synonyms": [
+          "num - 1 not in set",
+          "num - 1",
+          "start of sequence",
+          "streak start",
+          "not in set",
+          "beginning of streak",
+          "num - 1 is not in the set"
+        ],
+        "acceptableAlternatives": [
+          "skipping elements that have a predecessor so each streak is only checked once"
+        ],
+        "required": true
+      },
+      {
+        "id": "linear_streak_expansion",
+        "label": "Expand sequence using an inner while loop checking (num + 1) — each element is visited at most twice → total O(n)",
+        "weight": 0.25,
+        "synonyms": [
+          "inner while loop",
+          "visited at most twice",
+          "total o(n)",
+          "linear scan",
+          "extend streak",
+          "each number touched twice",
+          "num + 1"
+        ],
+        "acceptableAlternatives": [
+          "checking consecutive increments in the set while proving amortized O(n) runtime"
+        ],
+        "required": true
+      },
+      {
+        "id": "space_complexity",
+        "label": "Explicitly states space complexity is O(n) auxiliary space for the HashSet",
+        "weight": 0.1,
+        "synonyms": [
+          "o(n) space",
+          "space o(n)",
+          "o(n) memory",
+          "hash set space",
+          "space is o(n)"
+        ],
+        "acceptableAlternatives": [
+          "linear auxiliary memory required to store the numbers in the set"
+        ],
+        "required": false
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "Sort the array first and scan consecutively for O(n) time",
+        "matchPattern": "\\b(sort.*first.*for o\\(n\\)|sort the array first)\\b",
+        "correction": "Comparison sorting takes O(n log n) time, which violates the strict O(n) runtime requirement.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "Using a nested while loop makes this solution O(n^2)",
+        "matchPattern": "\\b(while loop.*makes it o\\(n\\^2\\)|while loop.*o\\(n\\^2\\))\\b",
+        "correction": "Because of the `num - 1 not in set` guard, only the minimum element of each sequence triggers the while loop. Each element is examined at most twice, yielding strictly O(n) time.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions putting numbers in a set and checking sequences.",
+      "good": "Explains using a HashSet, checking if num - 1 exists before starting a sequence, and achieving O(n) time.",
+      "excellent": "Full algorithm: HashSet O(1) lookups, num - 1 start check, mathematical proof of why inner while loop is amortized O(n) (each node visited at most twice), and O(n) space."
+    },
+    "complexity": {
+      "time": "O(n)",
+      "space": "O(n)"
+    },
+    "edgeCases": [
+      "Empty array (return 0)",
+      "Array with duplicates",
+      "Negative integers",
+      "Single element array"
+    ],
+    "modelAnswer": "```python\ndef longestConsecutive(nums):\n    num_set = set(nums)  # O(n) time to build, O(n) space\n    longest_streak = 0\n    \n    for num in num_set:\n        # Only start counting if num is the beginning of a sequence\n        if num - 1 not in num_set:\n            current_num = num\n            current_streak = 1\n            \n            while current_num + 1 in num_set:\n                current_num += 1\n                current_streak += 1\n                \n            longest_streak = max(longest_streak, current_streak)\n            \n    return longest_streak\n```\n**Why O(n) Time:**\nAlthough there is a while loop inside a for loop, the `num - 1 not in set` guard ensures that the while loop only runs for the very first element of any sequence. Each number is visited at most twice (once in the outer set iteration and once inside the streak expansion), guaranteeing strictly $O(n)$ time."
+  },
+  {
+    "id": "dsa-floyd-cycle-detection",
+    "track": "DSA",
+    "domain": "dsa",
+    "topic": "Linked Lists & Two Pointers",
+    "difficulty": "Medium",
+    "question": "How would you detect a cycle in a singly linked list and find the cycle start node? Prove why Floyd's algorithm works.",
+    "keyPoints": [
+      {
+        "id": "fast_slow_meeting",
+        "label": "Floyd's Tortoise and Hare: slow pointer advances 1 step, fast pointer advances 2 steps; they meet if a cycle exists",
+        "weight": 0.3,
+        "synonyms": [
+          "slow and fast",
+          "tortoise and hare",
+          "slow 1 step fast 2 steps",
+          "two pointer",
+          "meet inside cycle",
+          "fast reaches null",
+          "slow pointer moving 1 step and a fast pointer moving 2 steps",
+          "slow and fast pointers"
+        ],
+        "acceptableAlternatives": [
+          "moving two pointers at different speeds (1 and 2 steps) until they collide"
+        ],
+        "required": true
+      },
+      {
+        "id": "find_cycle_start",
+        "label": "To find cycle start: reset one pointer to head, keep other at meeting point, advance both at 1 step — they meet at cycle entry",
+        "weight": 0.3,
+        "synonyms": [
+          "reset to head",
+          "one pointer to head",
+          "both 1 step",
+          "meet at cycle start",
+          "meet at the cycle entry",
+          "entry node of cycle"
+        ],
+        "acceptableAlternatives": [
+          "after collision, reposition slow to head and step both by 1 until they collide at the loop start"
+        ],
+        "required": true
+      },
+      {
+        "id": "mathematical_proof",
+        "label": "Mathematical proof: distance from head to cycle start L equals nC - k (meeting point distance from start)",
+        "weight": 0.25,
+        "synonyms": [
+          "proof",
+          "l = nc - k",
+          "distance formula",
+          "2(l + k)",
+          "cycle length c",
+          "modular arithmetic proof",
+          "mathematical proof"
+        ],
+        "acceptableAlternatives": [
+          "algebraic proof showing head-to-entry distance equals remaining distance around the cycle to entry"
+        ],
+        "required": true
+      },
+      {
+        "id": "complexity_invariants",
+        "label": "Runs in O(n) time and O(1) auxiliary space without modifying node values or using a visited set",
+        "weight": 0.15,
+        "synonyms": [
+          "o(n) time",
+          "o(1) space",
+          "constant space",
+          "no extra space",
+          "no visited set",
+          "without a visited set"
+        ],
+        "acceptableAlternatives": [
+          "optimal constant auxiliary memory with linear time complexity"
+        ],
+        "required": false
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "The initial collision point of fast and slow pointers is always the cycle start node",
+        "matchPattern": "\\b(meeting point.*always.*cycle start|initial meeting point.*cycle start)\\b",
+        "correction": "The initial meeting point is simply a node inside the cycle. You must reset one pointer to head and move both at 1 step/iteration to find the true cycle entry node.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "The recommended interview solution is to store visited nodes in a HashSet",
+        "matchPattern": "\\b(optimal.*store.*visited.*hashset|interview solution.*hashset)\\b",
+        "correction": "Using a HashSet uses O(n) extra space. Interviewers expect Floyd's Cycle Finding algorithm because it operates in O(1) constant space.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions fast and slow pointers meeting.",
+      "good": "Explains two pointers meeting and resetting one pointer to head to find the cycle start in O(1) space.",
+      "excellent": "Explains fast/slow traversal, reset procedure, exact mathematical proof (2(L+k) = L+k+nC => L = nC-k), and O(n) time / O(1) space complexity."
+    },
+    "complexity": {
+      "time": "O(n)",
+      "space": "O(1)"
+    },
+    "edgeCases": [
+      "No cycle (fast or fast.next is null)",
+      "Single node with self loop",
+      "Single node pointing to null",
+      "Two nodes with cycle"
+    ],
+    "modelAnswer": "**Floyd's Tortoise and Hare Cycle Finding:**\n1. Initialize `slow = head` and `fast = head`.\n2. Move `slow` by 1 step (`slow = slow.next`) and `fast` by 2 steps (`fast = fast.next.next`).\n3. If `fast` or `fast.next` reaches `null`, the list has no cycle.\n4. If `slow == fast`, a cycle is detected.\n\n**Finding Cycle Start:**\nReset `slow = head`, leaving `fast` at the meeting point. Advance both `slow` and `fast` by **1 step** simultaneously. The node where they meet is the **exact cycle start**.\n\n**Mathematical Proof:**\n- Let $L$ = distance from head to cycle start.\n- Let $C$ = cycle circumference.\n- Let $k$ = distance from cycle start to meeting point.\n- Distance traveled by slow = $L + k$.\n- Distance traveled by fast = $2(L + k)$.\n- Since fast is ahead by some integer multiple of the cycle $nC$:\n  $$2(L + k) = L + k + nC implies L + k = nC implies L = nC - k$$\nThus, moving $L$ steps from head and $L$ steps from the meeting point both land at the cycle entry node."
+  },
+  {
+    "id": "dsa-lru-cache-design",
+    "track": "DSA",
+    "domain": "dsa",
+    "topic": "Design & Data Structures",
+    "difficulty": "Hard",
+    "question": "Design an LRU (Least Recently Used) Cache supporting get(key) and put(key, value) in O(1) time complexity.",
+    "keyPoints": [
+      {
+        "id": "doubly_linked_list_hashmap",
+        "label": "Combines a Doubly-Linked List with a HashMap (Map stores key -> Node pointer)",
+        "weight": 0.35,
+        "synonyms": [
+          "doubly-linked list with a hashmap",
+          "doubly linked list with a hashmap",
+          "doubly linked list and hashmap",
+          "hashmap and doubly linked list",
+          "map of key to node",
+          "dll and hash map"
+        ],
+        "acceptableAlternatives": [
+          "hash map for O(1) lookup combined with doubly linked list for O(1) node removal and insertion"
+        ],
+        "required": true
+      },
+      {
+        "id": "o1_get_and_put",
+        "label": "get(key): looks up node in map, moves node to head/tail in O(1); put(key, val): updates or adds node and evicts LRU node if over capacity",
+        "weight": 0.35,
+        "synonyms": [
+          "move it to the head",
+          "evict the tail",
+          "move to head",
+          "evict lru",
+          "remove from tail",
+          "o(1) get and put",
+          "update node value",
+          "evict oldest"
+        ],
+        "acceptableAlternatives": [
+          "constant time lookup with list reordering on get, and eviction of the least recently used node when capacity is full"
+        ],
+        "required": true
+      },
+      {
+        "id": "dummy_sentinel_nodes",
+        "label": "Uses dummy head and dummy tail sentinel nodes to eliminate null pointer edge cases in linked list operations",
+        "weight": 0.15,
+        "synonyms": [
+          "dummy head",
+          "dummy tail",
+          "sentinel nodes",
+          "pseudo head",
+          "pseudo tail",
+          "sentinels avoid edge cases",
+          "sentinel nodes eliminate"
+        ],
+        "acceptableAlternatives": [
+          "sentinel boundary nodes that avoid checking for null head and tail pointers"
+        ],
+        "required": false
+      },
+      {
+        "id": "space_complexity_o1_proof",
+        "label": "Time complexity O(1) for both operations; space complexity O(capacity) for map and list",
+        "weight": 0.15,
+        "synonyms": [
+          "o(1) time",
+          "o(capacity) space",
+          "constant time operations",
+          "linear space with capacity"
+        ],
+        "acceptableAlternatives": [
+          "strictly O(1) time complexity per operation and O(capacity) memory overhead"
+        ],
+        "required": false
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "A singly-linked list with a HashMap achieves O(1) eviction and updates",
+        "matchPattern": "\\b(singly[- ]linked list.*(o\\(1\\)|eviction))\\b",
+        "correction": "A singly-linked list cannot delete an arbitrary node in O(1) because finding the predecessor node requires an O(n) traversal. A doubly-linked list with `prev` and `next` pointers is strictly required.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "An array or queue with timestamps works in O(1)",
+        "matchPattern": "\\b(array with timestamps|queue with timestamps)\\b",
+        "correction": "Updating a key's recency inside an array or queue requires searching or shifting elements, which is O(n).",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions HashMap for lookup and a list for order.",
+      "good": "Explains HashMap storing node pointers and a doubly-linked list for O(1) deletion and insertion.",
+      "excellent": "Details HashMap + Doubly-Linked List, dummy head/tail sentinels, exact get/put pointer manipulations, and why singly-linked lists fail."
+    },
+    "complexity": {
+      "time": "O(1) get, O(1) put",
+      "space": "O(capacity)"
+    },
+    "edgeCases": [
+      "Capacity of 1",
+      "Updating existing key without increasing size",
+      "Evicting least recently used element",
+      "Non-existent key lookup"
+    ],
+    "modelAnswer": "**LRU Cache Architecture:**\nTo achieve **$O(1)$ `get` and $O(1)$ `put`**, combine two data structures:\n1. **Doubly-Linked List (DLL):** Maintains usage order. Most recently used items are at the head; least recently used items are at the tail. Node deletion and insertion are $O(1)$ because each node holds `prev` and `next` pointers.\n2. **HashMap:** Maps `key -> Node reference`. Provides $O(1)$ direct access to any node in the list.\n\n**Sentinel Nodes:**\nUsing dummy `head` and dummy `tail` sentinels eliminates edge cases when inserting or removing from an empty or single-node list.\n\n**Operations:**\n- **`get(key)`:** If key not in map, return -1. Otherwise, extract node via map, unlink it from its current position, insert it at `head.next` (most recent), and return its value.\n- **`put(key, value)`:**\n  - If key exists: update value and move node to head.\n  - If new key: create node, add to map, insert at head.\n  - If size exceeds `capacity`: remove `tail.prev` (LRU node) from both the list and the map."
+  },
+  {
+    "id": "cs-btree-vs-bplus-tree",
+    "track": "DBMS",
+    "domain": "cs_fundamentals",
+    "topic": "Indexing & Storage Engines",
+    "difficulty": "Hard",
+    "question": "Explain B-Trees vs B+ Trees. Why do modern relational databases like PostgreSQL and MySQL InnoDB use B+ Trees for table indexing?",
+    "keyPoints": [
+      {
+        "id": "data_storage_location",
+        "label": "B+ Trees store actual data records/pointers ONLY in leaf nodes; internal nodes store only routing keys",
+        "weight": 0.3,
+        "synonyms": [
+          "leaf nodes store data",
+          "only keys in internal nodes",
+          "data only in leaves",
+          "internal nodes routing keys",
+          "no data in internal nodes",
+          "only in leaf nodes"
+        ],
+        "acceptableAlternatives": [
+          "B-Trees store data pointers at every node while B+ Trees restrict data exclusively to leaves"
+        ],
+        "required": true
+      },
+      {
+        "id": "linked_leaf_nodes",
+        "label": "B+ Tree leaf nodes are linked in a sequential doubly-linked list enabling fast O(k) range scans",
+        "weight": 0.25,
+        "synonyms": [
+          "linked leaves",
+          "doubly linked list of leaves",
+          "linked in a doubly-linked list",
+          "range scan",
+          "sequential scan",
+          "between queries",
+          "leaf pointer list",
+          "range scans in o(k)"
+        ],
+        "acceptableAlternatives": [
+          "leaves form a contiguous linked chain that allows sequential range traversal without tree re-traversal"
+        ],
+        "required": true
+      },
+      {
+        "id": "higher_fanout_shallow_tree",
+        "label": "Higher fan-out in B+ Trees: internal nodes without data fit far more keys per disk block → shallower tree → fewer disk I/Os",
+        "weight": 0.25,
+        "synonyms": [
+          "higher fan out",
+          "higher fan-out",
+          "fanout",
+          "more keys per page",
+          "shallower tree",
+          "fewer disk ios",
+          "disk page capacity",
+          "fewer disk i/os"
+        ],
+        "acceptableAlternatives": [
+          "internal pages hold hundreds of routing keys, keeping tree height to 3-4 levels even for millions of rows"
+        ],
+        "required": true
+      },
+      {
+        "id": "btree_contrasting_limits",
+        "label": "B-Trees store data at all levels, reducing internal node key capacity and requiring tree traversals for range queries",
+        "weight": 0.2,
+        "synonyms": [
+          "btree stores data at internal",
+          "lower fanout",
+          "cannot scan leaves directly",
+          "inorder traversal for range queries",
+          "b-trees which store data at every level"
+        ],
+        "acceptableAlternatives": [
+          "B-Tree internal nodes contain data pointers, making them bulky and range scans inefficient"
+        ],
+        "required": false
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "B-Trees and B+ Trees have identical performance for range queries",
+        "matchPattern": "\\b(b[- ]trees and b\\+[- ]trees have identical performance)\\b",
+        "correction": "B+ Tree leaves are linked together in a list, allowing range scans in O(k) sequential disk reads. B-Trees require expensive full-tree in-order traversals.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "B+ Trees store full table rows in internal routing nodes",
+        "matchPattern": "\\b(b\\+[- ]trees store full table rows in internal)\\b",
+        "correction": "Internal nodes in B+ Trees store ONLY keys and child page pointers, maximizing fan-out.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions B+ Trees store data at leaves and have linked lists.",
+      "good": "Explains leaves hold data, leaf linked list enables range scans, and internal nodes hold only keys.",
+      "excellent": "Details higher fan-out per disk page, shallower tree depth (3-4 levels), sequential I/O range scans, and clustered index layout in InnoDB."
+    },
+    "modelAnswer": "**B-Tree vs. B+ Tree:**\n- **B-Tree:** Keys and data record pointers are stored across **all nodes** (both internal routing nodes and leaf nodes).\n- **B+ Tree:** Internal nodes store **only routing keys and child page pointers**. All actual data row pointers (or clustered row data) reside exclusively in **leaf nodes**. Furthermore, all leaf nodes are connected via a **doubly-linked list**.\n\n**Why Databases Use B+ Trees:**\n1. **Much Higher Fan-out & Shallower Trees:** Because internal nodes store no data pointers, a single 16KB disk page can hold hundreds of routing keys. A 3-to-4 level B+ Tree can index hundreds of millions of records, requiring at most 3–4 disk I/O reads.\n2. **Efficient Range Queries ($O(k)$):** Queries like `BETWEEN X AND Y` locate the starting key in $O(log n)$, then simply traverse the leaf linked list sequentially. B-Trees require expensive recursive in-order tree traversals across disk blocks.\n3. **Consistent Lookup Performance:** Every query traverses from root to leaf, giving uniform $O(log n)$ disk seek latency."
+  },
+  {
+    "id": "cs-tcp-three-way-handshake",
+    "track": "Technical",
+    "domain": "cs_fundamentals",
+    "topic": "Networking & Transport Layer",
+    "difficulty": "Medium",
+    "question": "Explain the TCP 3-way handshake and 4-way teardown. Why is a 3-way handshake needed instead of just 2 packets, and what is TIME_WAIT?",
+    "keyPoints": [
+      {
+        "id": "handshake_steps",
+        "label": "3-way handshake: Client sends SYN(seq=x), Server replies SYN-ACK(seq=y, ack=x+1), Client sends ACK(ack=y+1)",
+        "weight": 0.3,
+        "synonyms": [
+          "syn",
+          "syn ack",
+          "ack",
+          "syn, syn-ack, and ack",
+          "seq x",
+          "ack x+1",
+          "three way handshake",
+          "synchronize",
+          "acknowledge"
+        ],
+        "acceptableAlternatives": [
+          "client SYN, server SYN-ACK, client ACK sequence establishing bidirectional connection"
+        ],
+        "required": true
+      },
+      {
+        "id": "why_three_packets",
+        "label": "Why 3 packets: both sides must independently negotiate initial sequence numbers (ISNs) and confirm bidirectional delivery",
+        "weight": 0.25,
+        "synonyms": [
+          "bidirectional",
+          "both sides confirm",
+          "isn",
+          "initial sequence numbers",
+          "prevent duplicate old connections",
+          "three packets are needed because both sides"
+        ],
+        "acceptableAlternatives": [
+          "two packets cannot verify that the client can receive from the server or prevent stale duplicate SYN packets"
+        ],
+        "required": true
+      },
+      {
+        "id": "teardown_steps",
+        "label": "4-way teardown: FIN from initiator, ACK from receiver; then FIN from receiver, and final ACK from initiator (handles half-close)",
+        "weight": 0.25,
+        "synonyms": [
+          "fin",
+          "fin ack",
+          "four way teardown",
+          "4-way teardown",
+          "half-close",
+          "teardown",
+          "close connection"
+        ],
+        "acceptableAlternatives": [
+          "independent FIN and ACK from each direction because TCP is full-duplex"
+        ],
+        "required": true
+      },
+      {
+        "id": "time_wait_state",
+        "label": "TIME_WAIT state (2MSL): ensures final ACK was delivered and prevents delayed packets from colliding with new connections",
+        "weight": 0.2,
+        "synonyms": [
+          "time_wait",
+          "time wait",
+          "2msl",
+          "maximum segment lifetime",
+          "delayed packets",
+          "ensure final ack",
+          "lingering packets"
+        ],
+        "acceptableAlternatives": [
+          "waiting 2MSL so delayed segments from the old connection die off and final ACK retransmission is possible"
+        ],
+        "required": false
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "A 2-way handshake is sufficient to reliably establish a full-duplex TCP connection",
+        "matchPattern": "\\b(2[- ]way|two[- ]way|2 packets).*(sufficient|enough|adequate)\\b",
+        "correction": "A 2-way handshake cannot confirm that the client received the server's initial sequence number, and old duplicate packets could trigger ghost connections on the server.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "TIME_WAIT is an error state that indicates a connection leak",
+        "matchPattern": "\\btime[-_ ]wait is an error state\\b",
+        "correction": "TIME_WAIT is a normal and necessary TCP state (duration 2MSL) that guarantees lingering packets expire and the peer received the final ACK.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions SYN, SYN-ACK, ACK and FIN packets.",
+      "good": "Explains SYN, SYN-ACK, ACK, why 2 packets fail (ISN negotiation), FIN/ACK teardown, and TIME_WAIT.",
+      "excellent": "Details ISN negotiation, full-duplex independent closing, 2MSL TIME_WAIT mechanics, and SYN flood / delayed packet hazards."
+    },
+    "modelAnswer": "**TCP 3-Way Handshake:**\n1. **Client -> Server: SYN (seq = x)** — Client requests connection with its Initial Sequence Number (ISN).\n2. **Server -> Client: SYN-ACK (seq = y, ack = x + 1)** — Server acknowledges client's ISN and provides its own ISN.\n3. **Client -> Server: ACK (ack = y + 1)** — Client acknowledges server's ISN. Connection is now `ESTABLISHED`.\n\n**Why 3 Packets Instead of 2?**\nTCP is full-duplex. Both endpoints must independently establish and verify sequence numbers in both directions. If only 2 packets were used, the server could not know whether the client received its SYN-ACK, and delayed duplicate SYN packets could cause the server to allocate phantom connections.\n\n**TCP 4-Way Teardown:**\nBecause TCP is full-duplex, either side can close its send channel while keeping receive open (**half-close**):\n1. Active closer -> FIN\n2. Passive closer -> ACK\n3. Passive closer -> FIN (when done sending data)\n4. Active closer -> ACK\n\n**TIME_WAIT (2MSL):**\nThe active closer stays in `TIME_WAIT` for 2 × Maximum Segment Lifetime (~60–120s) to:\n1. Retransmit the final ACK if it was dropped, preventing the peer from remaining in `LAST_ACK`.\n2. Allow all wandering/delayed duplicate packets in the network to expire before reusing the socket pair."
+  },
+  {
+    "id": "hr-conflict-resolution",
+    "track": "HR",
+    "domain": "behavioral",
+    "topic": "STAR Behavioral — Conflict Resolution",
+    "difficulty": "Medium",
+    "question": "Tell me about a time you faced a serious technical disagreement with a teammate on an engineering project. How did you resolve it?",
+    "keyPoints": [
+      {
+        "id": "star_situation",
+        "label": "Situation: specific project context, the technical stakes, and the nature of the disagreement",
+        "weight": 0.25,
+        "synonyms": [
+          "situation",
+          "project context",
+          "disagreement",
+          "conflict",
+          "working on",
+          "architecture debate",
+          "in our payment service project",
+          "in our project, we had a disagreement"
+        ],
+        "acceptableAlternatives": [
+          "setting a clear real-world project background explaining the conflicting approaches"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_task",
+        "label": "Task: personal role, ownership, and why reaching a timely resolution mattered to the project",
+        "weight": 0.25,
+        "synonyms": [
+          "my role",
+          "my responsibility",
+          "task",
+          "needed to resolve",
+          "stakes",
+          "timeline",
+          "my task was backend lead",
+          "my role was backend engineer"
+        ],
+        "acceptableAlternatives": [
+          "defining personal accountability for driving technical alignment without missing deadlines"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_action_evidence",
+        "label": "Action: used objective data, benchmarks, prototypes, or active listening rather than emotional arguments",
+        "weight": 0.25,
+        "synonyms": [
+          "action",
+          "data",
+          "benchmark",
+          "prototype",
+          "proof of concept",
+          "listened",
+          "tradeoff matrix",
+          "tested",
+          "built a prototype benchmark test",
+          "had a discussion, compromised"
+        ],
+        "acceptableAlternatives": [
+          "creating empirical test cases or structured evaluation to let evidence guide the decision"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_result_metrics",
+        "label": "Result: concrete positive outcome, metrics, on-time delivery, and team alignment",
+        "weight": 0.25,
+        "synonyms": [
+          "result",
+          "outcome",
+          "shipped on time",
+          "shipped on schedule",
+          "metrics",
+          "aligned",
+          "zero errors",
+          "positive outcome",
+          "learned",
+          "zero financial discrepancies",
+          "finishing the feature"
+        ],
+        "acceptableAlternatives": [
+          "delivering the product successfully with measurable performance and preserved working relationships"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "I escalated to my manager immediately so they could make the call",
+        "matchPattern": "\\b(escalated to (my )?manager|manager make the call)\\b",
+        "correction": "Immediate escalation without attempting peer resolution signals low collaboration maturity. Top candidates resolve disagreements peer-to-peer using empirical data.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "I just gave in and let them do it their way to avoid conflict",
+        "matchPattern": "\\b(gave in|let them do it their way to avoid conflict)\\b",
+        "correction": "Passive avoidance signals lack of ownership. Interviewers look for constructive assertiveness: defending technical integrity with evidence while remaining humble.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "Describes an argument and says they compromised.",
+      "good": "Covers Situation, Task, Action, and Result, mentioning discussion and team agreement.",
+      "excellent": "Full STAR structure: high-stakes situation, clear task ownership, empirical data-driven action (benchmarks/prototyping), and quantified business/system result."
+    },
+    "starComponents": {
+      "situation": "Context of project, conflicting architectural choices.",
+      "task": "Personal responsibility to achieve alignment.",
+      "action": "Data-driven experiments, benchmarks, active listening.",
+      "result": "Shipped milestone, performance metrics, team cohesion."
+    },
+    "competencies": [
+      "Conflict Resolution",
+      "Collaboration",
+      "Data-Driven Decision Making",
+      "Communication"
+    ],
+    "modelAnswer": "**STAR Model Response:**\n- **Situation:** During the design of our core payment processing microservice, my lead colleague advocated for MongoDB for schema agility, whereas I argued for PostgreSQL because financial ledgers require strict ACID guarantees.\n- **Task:** As the backend engineer accountable for transaction reliability, I needed to resolve the deadlock within 3 days to avoid delaying our Q3 sprint launch.\n- **Action:** Rather than arguing hypotheticals, I built a benchmark harness over a weekend simulating 50,000 concurrent transactions with network jitter. I demonstrated that Postgres with JSONB columns met our document schema needs while completely eliminating partial write inconsistencies. I presented the metrics to the team in a collaborative 30-minute review.\n- **Result:** We unanimously agreed on PostgreSQL with JSONB. We deployed on schedule, sustained 12,000 requests/sec during Black Friday with zero data discrepancies, and established a benchmark-first design standard for our team."
+  },
+  {
+    "id": "hr-production-outage-ownership",
+    "track": "HR",
+    "domain": "behavioral",
+    "topic": "STAR Behavioral — Ownership & Resilience",
+    "difficulty": "Medium",
+    "question": "Describe a scenario where a project or feature you built failed in production or missed a critical deadline. What went wrong and what did you change?",
+    "keyPoints": [
+      {
+        "id": "star_situation_outage",
+        "label": "Situation: concrete production incident, outage, or missed deadline with real system context",
+        "weight": 0.25,
+        "synonyms": [
+          "situation",
+          "production outage",
+          "incident",
+          "failure",
+          "deadline missed",
+          "bug in prod",
+          "downtime",
+          "causing a 11-minute outage",
+          "locked our active orders table"
+        ],
+        "acceptableAlternatives": [
+          "describing a specific failure in a live environment or high-impact delivery delay"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_task_ownership",
+        "label": "Task: took direct personal ownership and accountability without deflecting blame onto tools or teammates",
+        "weight": 0.25,
+        "synonyms": [
+          "ownership",
+          "my responsibility",
+          "i owned",
+          "accountability",
+          "my fault",
+          "no blaming others",
+          "took immediate personal ownership",
+          "incident command"
+        ],
+        "acceptableAlternatives": [
+          "stepping up to lead remediation and accepting responsibility for the root cause"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_action_postmortem",
+        "label": "Action: executed emergency mitigation, led transparent communication, and conducted a blameless post-mortem",
+        "weight": 0.25,
+        "synonyms": [
+          "rollback",
+          "hotfix",
+          "postmortem",
+          "post-mortem",
+          "root cause analysis",
+          "mitigation",
+          "communicated",
+          "blameless",
+          "executed a rollback",
+          "authored a blameless post-mortem"
+        ],
+        "acceptableAlternatives": [
+          "rolling back, fixing the bug, and analyzing failure modes systematically"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_result_safeguards",
+        "label": "Result: restored service, implemented automated CI/CD safeguards or alerts to guarantee it never recurs",
+        "weight": 0.25,
+        "synonyms": [
+          "automated tests",
+          "monitoring",
+          "alerting",
+          "never recurred",
+          "ci/cd check",
+          "prevented recurrence",
+          "result",
+          "automated safeguard prevented",
+          "service was restored"
+        ],
+        "acceptableAlternatives": [
+          "measuring uptime recovery and establishing automated guardrails that improved team engineering standards"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "It was not my fault because the QA team or product manager gave bad requirements",
+        "matchPattern": "\\b(not my fault.*qa|blame.*qa|qa team gave bad)\\b",
+        "correction": "Deflecting blame onto QA, teammates, or management signals low extreme ownership. Senior engineers own the end-to-end outcome.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "We just rolled back and moved on without root cause analysis",
+        "matchPattern": "\\b(rolled back and moved on without root cause)\\b",
+        "correction": "Rolling back without root-cause analysis and automated preventative guardrails leaves the system vulnerable to identical future failures.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "States they made a mistake, fixed it, and were more careful.",
+      "good": "Outlines a production bug, rollback, and adding tests.",
+      "excellent": "Full STAR: high-stakes incident, immediate radical ownership, blameless post-mortem, and automated architectural safeguards added to CI/CD."
+    },
+    "starComponents": {
+      "situation": "Production incident and user impact.",
+      "task": "Incident commander ownership and accountability.",
+      "action": "Rollback, transparent stakeholder communication, root-cause analysis.",
+      "result": "Restored SLA, permanent CI/CD prevention checks."
+    },
+    "competencies": [
+      "Ownership",
+      "Resilience",
+      "Incident Management",
+      "Continuous Improvement"
+    ],
+    "modelAnswer": "**STAR Model Response:**\n- **Situation:** During a high-traffic release, a database migration I authored added a non-null column without a default value to our 40-million-row `orders` table. The DDL locked the table in PostgreSQL, causing API timeouts for 11 minutes.\n- **Task:** As the deploying engineer, I immediately assumed incident command. My responsibility was to restore user traffic instantly and take full accountability for the incident.\n- **Action:** I initiated our rollback protocol within 2 minutes to release the lock. I provided live updates every 5 minutes on our incident status channel. Following resolution, I authored a transparent blameless post-mortem and added an automated `pg-lock-audit` lint check in our CI/CD pipeline to block non-concurrent index or table locks.\n- **Result:** We restored 100% service availability within 11 minutes with zero data corruption. Over the subsequent 18 months, our automated lock check caught 6 potentially locking migrations before they ever reached staging."
+  },
+  {
+    "id": "hr-prioritization-tight-deadlines",
+    "track": "HR",
+    "domain": "behavioral",
+    "topic": "STAR Behavioral — Prioritization & Delivery",
+    "difficulty": "Medium",
+    "question": "How do you handle situations where you have competing deadlines and ambiguous or shifting requirements? Give a specific example.",
+    "keyPoints": [
+      {
+        "id": "star_situation_competing",
+        "label": "Situation: multiple high-priority deliverables with constrained timelines and ambiguous scope",
+        "weight": 0.25,
+        "synonyms": [
+          "competing priorities",
+          "tight deadline",
+          "multiple projects",
+          "ambiguous requirements",
+          "shifting scope",
+          "conflicting deadlines between",
+          "two weeks before product launch"
+        ],
+        "acceptableAlternatives": [
+          "setting context of simultaneous urgent deliverables with incomplete specifications"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_task_triage",
+        "label": "Task: proactively triaged commitments and aligned expectations with product managers and stakeholders",
+        "weight": 0.25,
+        "synonyms": [
+          "triage",
+          "prioritized",
+          "aligned expectations",
+          "stakeholders",
+          "scope negotiation",
+          "impact assessment",
+          "my task was to determine business roi",
+          "align expectations with product managers"
+        ],
+        "acceptableAlternatives": [
+          "analyzing business impact to determine true critical path and managing stakeholder expectations"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_action_mvp",
+        "label": "Action: broke work into phased MVPs, timeboxed ambiguity with spike investigations, and communicated trade-offs",
+        "weight": 0.25,
+        "synonyms": [
+          "mvp",
+          "phased release",
+          "timebox",
+          "spike",
+          "trade-off communication",
+          "clarified requirements",
+          "timeboxed a spike",
+          "negotiated a phased mvp"
+        ],
+        "acceptableAlternatives": [
+          "delivering core value first through incremental milestones while clarifying secondary requirements"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_result_delivery",
+        "label": "Result: successfully delivered highest-impact milestones on schedule without team burnout or quality degradation",
+        "weight": 0.25,
+        "synonyms": [
+          "delivered on time",
+          "shipped mvp",
+          "prevented burnout",
+          "high quality",
+          "positive stakeholder feedback",
+          "passed soc-2 with zero findings",
+          "launched the mvp on time"
+        ],
+        "acceptableAlternatives": [
+          "meeting critical business deadline with a working solution and clear roadmap for remaining scope"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "I just worked 18-hour days to get everything done without telling anyone",
+        "matchPattern": "\\b(worked 18[- ]hour days|worked 80 hours.*without telling)\\b",
+        "correction": "Heroics and silent overwork lead to burnout and buggy code; professional engineers manage scope, communicate trade-offs, and align on phased delivery.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "I waited for management to tell me which task was more important",
+        "matchPattern": "\\b(waited for management to tell me)\\b",
+        "correction": "Passively waiting for direction under ambiguity shows low initiative. Proactive engineers present prioritized options with trade-offs.",
+        "penalty": 0.25
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions making a to-do list and working hard.",
+      "good": "Explains discussing priorities with the manager and focusing on high-impact tasks.",
+      "excellent": "Full STAR: ambiguous multi-project clash, stakeholder matrix alignment, phased MVP scoping, and quantifiable on-time delivery."
+    },
+    "starComponents": {
+      "situation": "Conflicting project timelines and fuzzy requirements.",
+      "task": "Determining business ROI and leading scope negotiation.",
+      "action": "Phased release schedule, rapid spikes, weekly stakeholder syncs.",
+      "result": "P0 features shipped on time, secondary features prioritized cleanly."
+    },
+    "competencies": [
+      "Prioritization",
+      "Time Management",
+      "Stakeholder Communication",
+      "Adaptability"
+    ],
+    "modelAnswer": "**STAR Model Response:**\n- **Situation:** Two weeks before our enterprise product launch, marketing requested a major customer analytics dashboard while security mandated remediating critical SOC-2 dependency vulnerabilities. Requirements for the dashboard were vague and evolving.\n- **Task:** As lead engineer, I had to ensure we satisfied SOC-2 compliance while shipping a valuable analytics experience without missing our public launch date.\n- **Action:** I performed an impact triage. I timeboxed a 1-day spike to patch the SOC-2 libraries. For the dashboard, I held a 45-minute sync with product managers, established an MVP containing the 3 highest-requested metrics (rather than all 12), and documented the remaining 9 metrics for a Phase 2 sprint.\n- **Result:** We passed our SOC-2 audit with zero findings and launched the MVP dashboard on launch day with 99.98% uptime. Client adoption was 78%, and Phase 2 was delivered cleanly the following month."
+  },
+  {
+    "id": "dsa-two-sum-sorted-two-pointers",
+    "track": "DSA",
+    "domain": "dsa",
+    "topic": "Two Pointers & Arrays",
+    "difficulty": "Easy",
+    "question": "Given a 1-indexed array of integers that is already sorted in non-decreasing order, find two numbers such that they add up to a specific target number in O(1) extra space.",
+    "keyPoints": [
+      {
+        "id": "two_pointers_opposite_ends",
+        "label": "Initialize two pointers: left pointer at the beginning (index 0 or 1) and right pointer at the end of the sorted array",
+        "weight": 0.35,
+        "synonyms": [
+          "two pointers",
+          "left pointer",
+          "right pointer",
+          "start and end",
+          "opposite ends"
+        ],
+        "acceptableAlternatives": [
+          "one pointer at start and one pointer at end"
+        ],
+        "required": true
+      },
+      {
+        "id": "pointer_movement_rule",
+        "label": "Sum = nums[left] + nums[right]; if sum < target, increment left; if sum > target, decrement right; if equal, return indices",
+        "weight": 0.4,
+        "synonyms": [
+          "sum < target increment left",
+          "sum > target decrement right",
+          "move left",
+          "move right",
+          "adjust pointers"
+        ],
+        "acceptableAlternatives": [
+          "shrink window based on comparison with target value"
+        ],
+        "required": true
+      },
+      {
+        "id": "space_time_complexity",
+        "label": "O(n) time complexity as each step advances at least one pointer; strictly O(1) auxiliary space",
+        "weight": 0.25,
+        "synonyms": [
+          "o(n) time",
+          "o(1) space",
+          "constant space",
+          "linear time",
+          "single pass"
+        ],
+        "acceptableAlternatives": [
+          "linear time with no extra memory allocated"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "Use a HashMap to store complements in O(n) space",
+        "correction": "While HashMap works for unsorted arrays, the problem explicitly states the array is already sorted and requires O(1) auxiliary space.",
+        "penalty": 0.2
+      },
+      {
+        "claim": "Two nested loops scanning all pairs is the optimal O(1) space approach",
+        "correction": "Nested loops take O(n^2) time. The two-pointer approach solves it in O(n) time while maintaining O(1) space.",
+        "penalty": 0.2
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions two pointers at both ends.",
+      "good": "Explains two pointers moving inward based on whether sum is smaller or larger than target.",
+      "excellent": "Explains monotonic two-pointer correctness, O(n) time / O(1) space, and why hash map is sub-optimal for sorted inputs."
+    },
+    "complexity": {
+      "time": "O(n)",
+      "space": "O(1)"
+    },
+    "edgeCases": [
+      "Exactly two elements",
+      "Negative numbers and zeroes",
+      "Target requires same number twice"
+    ],
+    "modelAnswer": "Initialize `left = 0` and `right = len(numbers) - 1`. While `left < right`: calculate `current_sum = numbers[left] + numbers[right]`. If `current_sum == target`, return indices. If `current_sum < target`, increment `left` to increase the sum. If `current_sum > target`, decrement `right` to decrease the sum. This guarantees finding the pair in $O(n)$ time and strictly $O(1)$ space."
+  },
+  {
+    "id": "cs-virtual-memory-paging",
+    "track": "Technical",
+    "domain": "cs_fundamentals",
+    "topic": "Operating Systems & Memory",
+    "difficulty": "Hard",
+    "question": "How does virtual memory paging work? Explain page tables, page faults, and how the OS and MMU handle a page fault.",
+    "keyPoints": [
+      {
+        "id": "virtual_to_physical_paging",
+        "label": "Virtual address space is divided into fixed-size pages; physical memory is divided into frames. MMU translates virtual addresses to physical frames",
+        "weight": 0.3,
+        "synonyms": [
+          "pages and frames",
+          "fixed size pages",
+          "mmu",
+          "virtual to physical",
+          "memory management unit",
+          "page table"
+        ],
+        "acceptableAlternatives": [
+          "dividing virtual memory into pages mapped to physical frames via hardware MMU"
+        ],
+        "required": true
+      },
+      {
+        "id": "page_fault_trap",
+        "label": "Page fault occurs when CPU accesses a page whose valid/present bit is 0 in the page table, triggering a hardware trap to the OS kernel",
+        "weight": 0.35,
+        "synonyms": [
+          "page fault",
+          "present bit 0",
+          "valid bit 0",
+          "hardware trap",
+          "os interrupt",
+          "not in ram"
+        ],
+        "acceptableAlternatives": [
+          "accessing unmapped page raises page fault exception handled by kernel interrupt handler"
+        ],
+        "required": true
+      },
+      {
+        "id": "page_fault_handling_steps",
+        "label": "OS handling: finds free frame (or evicts victim via LRU/clock), reads page from swap/disk into RAM, updates page table, restarts instruction",
+        "weight": 0.35,
+        "synonyms": [
+          "disk read",
+          "swap space",
+          "page replacement",
+          "lru",
+          "update page table",
+          "restart instruction",
+          "eviction"
+        ],
+        "acceptableAlternatives": [
+          "loading requested page from disk swap, allocating physical frame, setting present bit, and resuming the faulted instruction"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "Page faults are application crashes like segmentation faults",
+        "correction": "A page fault is a routine hardware trap that enables on-demand paging. The OS loads the missing page from disk and resumes execution transparently without crashing.",
+        "penalty": 0.2
+      },
+      {
+        "claim": "Page tables are stored in the CPU cache",
+        "correction": "Page tables are stored in main RAM; only recently used address translations are cached in the hardware TLB.",
+        "penalty": 0.15
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions loading pages from disk when not in memory.",
+      "good": "Explains pages, frames, valid bit = 0 triggering page fault, and loading from disk.",
+      "excellent": "Details MMU translation, hardware trap on present bit 0, page replacement algorithms (LRU/Clock), disk I/O, updating CR3/page table, and re-executing instruction."
+    },
+    "modelAnswer": "**Virtual Memory Paging:**\nThe virtual address space is split into fixed chunks (typically 4KB) called **pages**, while physical RAM is divided into **frames**. The hardware **Memory Management Unit (MMU)** translates virtual page numbers to physical frame numbers using **Page Tables**.\n\n**Page Fault Handling Lifecycle:**\n1. CPU attempts to read/write an address. MMU looks up the Page Table Entry (PTE).\n2. If the **Present/Valid bit is 0** (page resides on disk swap, not in RAM), the MMU raises a hardware **Page Fault Exception (Trap)** to the OS kernel.\n3. The OS context switches to kernel mode and locates the requested page in the swap partition.\n4. The OS finds an empty physical frame. If RAM is full, it executes a **page replacement algorithm** (e.g. LRU or Clock) to evict a victim page to disk (writing it back if the dirty bit is set).\n5. The OS initiates DMA disk I/O to read the page into the allocated physical frame.\n6. The OS updates the PTE with the new physical frame number and sets the Present bit to 1.\n7. The OS restores the faulting thread's register state and **re-executes the exact instruction that faulted**."
+  },
+  {
+    "id": "hr-cross-functional-alignment",
+    "track": "HR",
+    "domain": "behavioral",
+    "topic": "STAR Behavioral — Stakeholder Management",
+    "difficulty": "Medium",
+    "question": "Describe a situation where you had to persuade non-technical stakeholders (e.g. product managers, sales, or executives) to invest time in technical debt or engineering refactoring.",
+    "keyPoints": [
+      {
+        "id": "star_situation_debt",
+        "label": "Situation: mounting technical debt causing concrete business pain (slow releases, latency, incidents, or lost revenue)",
+        "weight": 0.25,
+        "synonyms": [
+          "technical debt",
+          "refactoring",
+          "stakeholders",
+          "slow releases",
+          "business impact",
+          "outages",
+          "latency"
+        ],
+        "acceptableAlternatives": [
+          "setting context where legacy code or architectural debt threatened business velocity"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_task_persuasion",
+        "label": "Task: needed to bridge the engineering-business gap and secure sprint allocation without alienating partners",
+        "weight": 0.25,
+        "synonyms": [
+          "persuade",
+          "my responsibility",
+          "bridge gap",
+          "secure buy in",
+          "business case",
+          "task"
+        ],
+        "acceptableAlternatives": [
+          "defining personal duty to translate technical risk into executive business terms"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_action_business_translation",
+        "label": "Action: translated code metrics into business KPIs ($ cost, user churn, release velocity), proposed incremental 20% budget",
+        "weight": 0.25,
+        "synonyms": [
+          "business kpis",
+          "financial cost",
+          "release velocity",
+          "incremental budget",
+          "20 percent",
+          "roi",
+          "data"
+        ],
+        "acceptableAlternatives": [
+          "framing refactoring in terms of customer experience and feature delivery speed rather than technical purity"
+        ],
+        "required": true
+      },
+      {
+        "id": "star_result_velocity",
+        "label": "Result: secured approval, completed refactoring, and delivered measurable velocity improvement or incident reduction",
+        "weight": 0.25,
+        "synonyms": [
+          "result",
+          "reduced incidents",
+          "increased velocity",
+          "faster deployment",
+          "stakeholder trust",
+          "shipped"
+        ],
+        "acceptableAlternatives": [
+          "achieving measurable business ROI like 50% faster feature delivery or 90% fewer regressions"
+        ],
+        "required": true
+      }
+    ],
+    "misconceptions": [
+      {
+        "claim": "I told the executives they don't understand code and refactored in secret without telling them",
+        "correction": "Refactoring in secret breaks executive trust and misaligns engineering with company goals. Great engineers translate technical risk into business ROI.",
+        "penalty": 0.25
+      },
+      {
+        "claim": "I demanded a 6-month complete rewrite of the entire system from scratch",
+        "correction": "Full system rewrites rarely succeed and stop business feature flow. The industry standard is incremental refactoring (Strangler Fig pattern).",
+        "penalty": 0.2
+      }
+    ],
+    "depthLevels": {
+      "basic": "Mentions explaining that old code was hard to read.",
+      "good": "Explains translating technical debt into release speed and getting stakeholder buy-in.",
+      "excellent": "Full STAR: quantified business risk (lead time, SLA violations), 20% incremental sprint agreement, and measured post-refactoring ROI."
+    },
+    "starComponents": {
+      "situation": "Legacy bottleneck impacting feature velocity.",
+      "task": "Translating engineering debt to business outcomes.",
+      "action": "Quantified ROI presentation, incremental 20% sprint agreement.",
+      "result": "Halved build/deploy times, reduced Sev-2 incidents by 70%."
+    },
+    "competencies": [
+      "Stakeholder Management",
+      "Persuasion",
+      "Business Acumen",
+      "Communication"
+    ],
+    "modelAnswer": "**STAR Model Response:**\n- **Situation:** Our CI/CD pipeline and monolithic test suite had degraded to 55 minutes, causing deploy queues, developer frustration, and 3 production regression rollbacks in a single quarter. Product managers resisted allocating a full sprint to fix it.\n- **Task:** As a senior engineer, I needed to secure cross-functional buy-in to invest in pipeline modularization and test refactoring without halting roadmap deliverables.\n- **Action:** Instead of complaining about \"dirty code,\" I presented data in business terms: the 55-minute queue cost our 15-person engineering team approximately 60 lost engineering hours every week, directly delaying product launches. I proposed a compromise: dedicating **20% of engineering bandwidth per sprint over 3 sprints** (rather than pausing product work).\n- **Result:** Product leadership enthusiastically approved. We modularized the test harness and parallelized CI runs, reducing build times from 55 minutes to 7 minutes. Deployment frequency increased by 400%, regression rollbacks dropped to zero, and the PMs publicly commended the initiative."
+  }
+]

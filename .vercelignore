@@ -1,0 +1,19 @@
+# Dependencies
+node_modules
+client/node_modules
+
+# Git & IDE
+.git
+.vscode
+.idea
+
+# Build artifacts & logs
+*.log
+*.tsbuildinfo
+logs
+
+# Test artifacts and reports
+server/test
+MINOR_PROJECT_REPORT_INTERVIEWX.*
+AUDIT.md
+CLAUDE.md

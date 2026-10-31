@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080C14" />
+      <stop offset="50%" stop-color="#0E1624" />
+      <stop offset="100%" stop-color="#060910" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00E5FF" />
+      <stop offset="100%" stop-color="#FFFFFF" />
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1" />
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="675" fill="url(#bg)" />
+  <rect width="1200" height="675" fill="url(#grid)" />
+
+  <!-- Ambient glow circle -->
+  <circle cx="950" cy="200" r="280" fill="#00E5FF" opacity="0.12" filter="blur(60px)" />
+  <circle cx="200" cy="500" r="220" fill="#00E5FF" opacity="0.08" filter="blur(50px)" />
+
+  <!-- Decorative Circuit lines -->
+  <path d="M 800 100 L 1050 250 L 1150 250" fill="none" stroke="#00E5FF" stroke-width="2" opacity="0.3" />
+  <circle cx="1050" cy="250" r="4" fill="#00E5FF" opacity="0.6" />
+  <circle cx="800" cy="100" r="4" fill="#00E5FF" opacity="0.6" />
+
+  <path d="M 750 500 L 950 400 L 1100 400" fill="none" stroke="#00E5FF" stroke-width="2" opacity="0.25" />
+  <circle cx="950" cy="400" r="4" fill="#00E5FF" opacity="0.5" />
+
+  <!-- Top Brand bar -->
+  <rect x="80" y="70" width="10" height="10" fill="#00E5FF" />
+  <text x="105" y="80" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace" font-size="14" font-weight="700" letter-spacing="4" fill="#94A3B8">STRATA // ENGINEERING JOURNAL</text>
+
+  <!-- Category Tag -->
+  <rect x="80" y="140" width="180" height="34" rx="4" fill="rgba(255,255,255,0.04)" stroke="#00E5FF" stroke-width="1.5" />
+  <text x="96" y="162" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace" font-size="12" font-weight="800" letter-spacing="2.5" fill="#00E5FF">PREP GUIDES</text>
+
+  <!-- Title -->
+  <text x="80" y="270" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="48" font-weight="800" fill="#FFFFFF" letter-spacing="-1">SQL Joins & Queries</text>
+  <rect x="80" y="310" width="140" height="4" fill="#00E5FF" />
+
+  <!-- Subtitle telemetry text -->
+  <text x="80" y="380" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace" font-size="16" fill="#64748B" letter-spacing="1.5">TELEMETRY ARCHIVE // VERIFIED TECHNICAL CURRICULUM</text>
+  <text x="80" y="415" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace" font-size="14" fill="#475569">AUTHORED BY INTERVIEWX EDITORIAL TEAM • 31 OCT 2026</text>
+
+  <!-- Bottom Accent bar -->
+  <rect x="0" y="665" width="1200" height="10" fill="url(#accent)" />
+</svg>

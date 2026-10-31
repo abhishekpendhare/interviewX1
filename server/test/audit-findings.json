@@ -1,0 +1,92 @@
+[
+  {
+    "id": "SEC-IDOR-01",
+    "area": "Access Control",
+    "severity": "Critical",
+    "title": "Candidate Profile ID Isolation",
+    "evidence": "User A profile unchanged after User B submission (targetRole: default)",
+    "impact": "Prevents horizontal tampering",
+    "remediation": "Verified",
+    "status": "PASS"
+  },
+  {
+    "id": "SEC-MASS-01",
+    "area": "Access Control",
+    "severity": "High",
+    "title": "Mass Assignment Protection on Profile Fields",
+    "evidence": "Client-supplied coins/streak ignored (Coins: undefined, Streak: undefined)",
+    "impact": "Prevents arbitrary privilege and balance escalation",
+    "remediation": "Verified",
+    "status": "PASS"
+  },
+  {
+    "id": "SEC-LEAK-01",
+    "area": "Data Privacy",
+    "severity": "High",
+    "title": "Hidden Test Case & Answer Leakage in Public Problem API",
+    "evidence": "Problem lists do not expose hidden test cases or solution source code",
+    "impact": "Integrity maintained",
+    "remediation": "Verified",
+    "status": "PASS"
+  },
+  {
+    "id": "SEC-PROTO-01",
+    "area": "Injection",
+    "severity": "Critical",
+    "title": "Prototype Pollution via JSON Body",
+    "evidence": "Object.prototype.polluted is false",
+    "impact": "No global pollution detected",
+    "remediation": "Verified",
+    "status": "PASS"
+  },
+  {
+    "id": "SEC-XSS-01",
+    "area": "Injection",
+    "severity": "High",
+    "title": "Stored XSS in Candidate Name Profile Field",
+    "evidence": "Stored profile name: \"undefined\"",
+    "impact": "If rendered unescaped in DOM, executes arbitrary script in user session",
+    "remediation": "Sanitize HTML tags and use DOMPurify/validator on input and React JSX encoding on output",
+    "status": "PASS"
+  },
+  {
+    "id": "SEC-HDR-01",
+    "area": "Headers",
+    "severity": "Medium",
+    "title": "Content-Security-Policy (CSP) Configuration",
+    "evidence": "CSP: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https: http:; frame-ancestors 'none';",
+    "impact": "XSS and injection mitigation active",
+    "remediation": "Add strict Content-Security-Policy header in server/index.js",
+    "status": "PASS"
+  },
+  {
+    "id": "SEC-HDR-02",
+    "area": "Headers",
+    "severity": "Low",
+    "title": "X-Powered-By Server Information Disclosure",
+    "evidence": "X-Powered-By header is stripped",
+    "impact": "Reveals server framework to reconnaissance scanners",
+    "remediation": "app.disable(\"x-powered-by\")",
+    "status": "PASS"
+  },
+  {
+    "id": "A11Y-SKIP-01",
+    "area": "Accessibility",
+    "severity": "Low",
+    "title": "Skip to Main Content & #main-content Focusability",
+    "evidence": "main-content exists: true, skip-link active on Tab: true",
+    "impact": "Ensures keyboard and screen reader accessibility compliance",
+    "remediation": "Verified",
+    "status": "PASS"
+  },
+  {
+    "id": "RESP-OVERFLOW-01",
+    "area": "Responsive Quality",
+    "severity": "Medium",
+    "title": "Horizontal Layout Overflow across Viewport Widths (360px - 1920px)",
+    "evidence": "No horizontal overflow across all tested viewports",
+    "impact": "Causes mobile layout breaks and unwanted horizontal scrollbars",
+    "remediation": "Verified",
+    "status": "PASS"
+  }
+]
